@@ -8,7 +8,9 @@ defmodule Manole.MixProject do
       elixir: "~> 1.7",
       elixirc_paths: ["lib", "test"],
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [coveralls: :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test]
     ]
   end
 
@@ -24,8 +26,10 @@ defmodule Manole.MixProject do
     [
       {:ecto_sql, "~> 3.0"},
       {:ecto, "~> 3.0"},
-      {:postgrex, ">=0.0.0"},
+      {:postgrex, ">= 0.0.0"},
       {:libgraph, "~> 0.7"},
+
+      {:excoveralls, "~> 0.10", only: :test},
       {:credo, "~> 0.10", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false}
     ]

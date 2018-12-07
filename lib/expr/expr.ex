@@ -36,7 +36,7 @@ defmodule Manole.Expr do
 
   defimpl Inspect, for: Rule do
     def inspect(rule, _opts) do
-      "Rule##{rule.id}< #{rule.field} #{rule.operator} #{rule.value} >"
+      "Rule##{rule.id} <#{rule.field}#{rule.operator}#{rule.value}>"
     end
   end
 
@@ -48,7 +48,7 @@ defmodule Manole.Expr do
 
   defimpl Inspect, for: Group do
     def inspect(group, _opts) do
-      "Group##{group.id}<#{group.combinator}>"
+      "Group##{group.id} <#{group.combinator}>"
     end
   end
 end

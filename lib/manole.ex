@@ -1,7 +1,7 @@
 defmodule Manole do
   @external_resource "README.md"
   @moduledoc File.read!("README.md")
-             |> String.split("<!--moduledoc-->")
+             |> String.split("<!-- MDOC -->")
              |> Enum.at(1)
              |> String.trim()
 

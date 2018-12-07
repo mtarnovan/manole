@@ -84,17 +84,20 @@ defmodule ManoleTest do
     root = root(g)
 
     assert root == group1
+    assert inspect(group1) == "Group#1 <or>"
+    assert groups(g, group1) == [group3]
     assert children(g, root) |> Enum.map(& &1.id) == [2, 3]
     assert sibling_rules(g, rule7) == [rule8]
     assert children(g, children(g, root) |> List.first()) == []
     assert parent(g, root) == nil
     assert parent(g, rule4) == group3
+    assert inspect(rule4) == "Rule#4 <name=Paul>"
     assert parent(g, rule5) == group3
     assert parent(g, group3) == root
     assert rules(g, group3) == [rule4, rule5]
   end
 
-  test "ecto builder" do
+  test "Ecto query builder" do
     p1 = Repo.insert!(%Person{name: "Mihai", age: 10})
     p2 = Repo.insert!(%Person{name: "Mihai", age: 50})
     _p3 = Repo.insert!(%Person{name: "Paul", age: 10})
@@ -109,8 +112,8 @@ defmodule ManoleTest do
     filter2_results = Manole.build_query(Person, @filter2) |> Repo.all()
     filter3_results = Manole.build_query(Person, @filter3) |> Repo.all()
 
-    assert [p1, p2, p4, p6] === filter1_results
-    assert [p1, p4] === filter2_results
-    assert [p1, p2, p4, p5] === filter3_results
+    assert [p1, p2, p4, p6] == filter1_results
+    assert [p1, p4] == filter2_results
+    assert [p1, p2, p4, p5] == filter3_results
   end
 end

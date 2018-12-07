@@ -1,5 +1,10 @@
 # Manole
-<!--moduledoc-->
+
+Manole is a query builder for Ecto.
+
+__N.B. This project is in early/exploratory stages. Use with caution or not at all (for now).__
+
+<!-- MDOC -->
 Allows parsing of a filter and appending it to the given queryable.
 
 A filter definition looks like this:
@@ -31,11 +36,13 @@ Given a filter, we can build an Ecto query from it:
 
 ```elixir
 iex(2)> Manole.build_query(Person, filter) |> Repo.all
-[debug] QUERY OK source="people" db=1.1ms queue=2.0ms
+...
 SELECT p0."id", p0."name", p0."age", p0."income" FROM "people" AS p0 WHERE
 ((p0."name" = $1) AND (((p0."name" = $2) OR (p0."age" > $3)) AND ((((p0."name" = $4) AND (p0."age" < $5)) AND (p0."income" > $6)) OR $7))) ["Mihai", "Paul", 30, "Adriana", 27, 100000, false]
 ...
 ```
+
+__What follows, is planned but not yet implemented__
 
 If a rule contains a field with dots, it is interpreted as an association.
 The queryable is inspected to check if it already has a named binding for that
@@ -74,9 +81,9 @@ this would allow filtering on `post.title`, `post.comments.inserted_at` and
 `post.comments.tags.name`.
 
 If a field in the filter is not found in the whitelist, an error is returned.
-<!--moduledoc-->
+<!-- MDOC -->
 # TODOs
 
-- [ ] add support for joins
 - [ ] implement whitelisting
+- [ ] add support for joins and querying on association
 - [ ] remove dependency on libgraph

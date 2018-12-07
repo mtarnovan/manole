@@ -23,3 +23,5 @@ erl_crash.dump
 manole-*.tar
 
 SCRATCHPAD.ex
+
+.vscode/*

@@ -1,6 +1,6 @@
 defmodule Manole.Builder.Ecto do
   @moduledoc ~S"""
-  Appends the graph represenation of a filter to an `Ecto.Queryable`
+  Appends the graph representation of a filter to an `Ecto.Queryable`
   """
 
   alias Manole.Expr.Group, as: G

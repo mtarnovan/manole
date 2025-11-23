@@ -2,7 +2,8 @@
 
 Manole is a query builder for Ecto.
 
-**N.B. This project is in early/exploratory stages. Use with caution or not at all (for now).**
+**N.B. This project is in early/exploratory stages. Use with caution or not at
+all (for now).**
 
 <!-- MDOC -->
 
@@ -55,34 +56,18 @@ iex> {:ok, query} = Manole.build_query(Person, filter)
   where: p0.name == ^"Alice" and
   (p0.name == ^"Bob" or p0.age > ^"30" or
      (p0.name == ^"Carol" and p0.age < ^"27" and p0.income > ^"100000"))>}
-iex> Repo.all(query)
-[
-  %Manole.Person{
-    __meta__: #Ecto.Schema.Metadata<:loaded, "people">,
-    id: 521,
-    name: "Alice",
-    age: 30,
-    income: 50000,
-    dogs: #Ecto.Association.NotLoaded<association :dogs is not loaded>
-  },
-  %Manole.Person{
-    __meta__: #Ecto.Schema.Metadata<:loaded, "people">,
-    id: 522,
-    name: "Bob",
-    age: 35,
-    income: 60000,
-    dogs: #Ecto.Association.NotLoaded<association :dogs is not loaded>
-  }
-]
+iex> Repo.all(query) |> Enum.map( &&1.name)
+["Alice", "Bob"]
 ```
 
-Note: `Carol` is excluded because she does not match "Alice", "Bob", or "Age > 30", and fails the income requirement (> 100000) of the nested AND block.
+`Carol` is excluded because she does not match "Alice", "Bob", or "Age > 30",
+and fails the income requirement (> 100000) of the nested AND block.
 
 ### Association Support
 
-If a rule contains a field with dots, it is interpreted as an association.
-The queryable is inspected to check if it already has a named binding for that
-join, and if it doesn't, it is added automatically.
+If a rule contains a field with dots, it is interpreted as an association. The
+queryable is inspected to check if it already has a named binding for that join,
+and if it doesn't, it is added automatically.
 
 ```elixir
 %{
@@ -105,8 +90,9 @@ would result in something like this:
 
 ### Allowlisting (Security)
 
-An allowlist is a list of fields to allow on the input queryable and
-the associations. By default (if no allowlist is provided), all fields are allowed. If an allowlist is provided, only fields in the list are accessible.
+An allowlist is a list of fields to allow on the input queryable and the
+associations. By default (if no allowlist is provided), all fields are allowed.
+If an allowlist is provided, only fields in the list are accessible.
 
 #### Example:
 
@@ -125,7 +111,8 @@ Manole.build_query(Post, filter, opts)
 this would allow filtering on `post.title`, `post.comments.inserted_at` and
 `post.comments.tags.name`.
 
-If a field in the filter is not found in the allowlist, `{:error, "Field '...' is not in allowlist"}` is returned.
+If a field in the filter is not found in the allowlist, `{:error, "Field '...'
+is not in allowlist"}` is returned.
 
 ### Supported Operators
 
@@ -135,7 +122,8 @@ If a field in the filter is not found in the allowlist, `{:error, "Field '...' i
 - `>=`: Greater Than or Equal (`gte`)
 - `<`: Less Than (`lt`)
 - `<=`: Less Than or Equal (`lte`)
-- `contains`: Case-insensitive substring match (`ilike %value%`). Wildcards `%` and `_` in the value are escaped.
+- `contains`: Case-insensitive substring match (`ilike %value%`). Wildcards `%`
+  and `_` in the value are escaped.
 
 <!-- MDOC -->
 

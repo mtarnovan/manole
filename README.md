@@ -2,8 +2,8 @@
 
 Manole is a query builder for Ecto.
 
-**N.B. This project is in early/exploratory stages. Use with caution or not at
-all (for now).**
+**N.B. This is a toy project, if you're looking for something viable take a
+look at [Flop](https://github.com/woylie/flop).**
 
 <!-- MDOC -->
 

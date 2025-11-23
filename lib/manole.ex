@@ -84,14 +84,23 @@ defmodule Manole do
     end
   end
 
-  def parse_filter(%{rules: rules, combinator: combinator}) when is_list(rules) do
-    with {:ok, combinator_atom} <- validate_combinator(combinator),
-         {:ok, children} <- parse_children(rules) do
-      {:ok, %G{combinator: combinator_atom, children: children}}
+  def parse_filter(filter) when is_map(filter) do
+    rules = Map.get(filter, :rules) || Map.get(filter, "rules")
+    combinator = Map.get(filter, :combinator) || Map.get(filter, "combinator")
+
+    case {rules, combinator} do
+      {rules, combinator} when is_list(rules) and not is_nil(combinator) ->
+        with {:ok, combinator_atom} <- validate_combinator(combinator),
+             {:ok, children} <- parse_children(rules) do
+          {:ok, %G{combinator: combinator_atom, children: children}}
+        end
+
+      _ ->
+        {:error, "Filter must be a map with 'rules' list and 'combinator'"}
     end
   end
 
-  def parse_filter(_), do: {:error, "Filter must be a map with 'rules' list and 'combinator'"}
+  def parse_filter(_), do: {:error, "Filter must be a map"}
 
   defp parse_children(rules) do
     parsed =
@@ -105,9 +114,15 @@ defmodule Manole do
     with {:ok, list} <- parsed, do: {:ok, Enum.reverse(list)}
   end
 
-  defp parse_child(%{rules: _} = group), do: parse_filter(group)
+  defp parse_child(%{} = group) do
+    if Map.get(group, :rules) || Map.get(group, "rules") do
+      parse_filter(group)
+    else
+      parse_rule(group)
+    end
+  end
 
-  defp parse_child(rule) do
+  defp parse_rule(rule) do
     with {:ok, field} <- validate_required(rule, :field),
          {:ok, operator} <- validate_required(rule, :operator),
          {:ok, value} <- validate_required(rule, :value),

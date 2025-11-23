@@ -36,13 +36,19 @@ defmodule Manole.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:excoveralls, "~> 0.10", only: :test},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.19", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.19", only: :dev, runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
 
   defp aliases do
     [
-      lint: ["compile --warnings-as-errors", "credo --strict", "format --check-formatted"]
+      lint: [
+        "compile --warnings-as-errors",
+        "credo --strict",
+        "format --check-formatted",
+        "dialyzer"
+      ]
     ]
   end
 end

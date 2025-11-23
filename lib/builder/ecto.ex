@@ -19,7 +19,7 @@ defmodule Manole.Builder.Ecto do
     end)
   end
 
-  @spec build_dynamic(G.t(), Ecto.Query.t()) :: boolean() | Ecto.Query.DynamicExpr.t() | nil
+  @spec build_dynamic(G.t(), Ecto.Query.t()) :: boolean() | Ecto.Query.dynamic_expr() | nil
   def build_dynamic(%G{combinator: combinator, children: children}, q) do
     conditions =
       children

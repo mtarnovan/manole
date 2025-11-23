@@ -8,9 +8,6 @@ defmodule ManoleReadmeTest do
   end
 
   test "README example: Basic filter works" do
-    # Clean up
-    Repo.delete_all(Person)
-
     # Seed data as per user's updated README
     Repo.insert!(%Person{name: "Alice", age: 30, income: 50_000})
     Repo.insert!(%Person{name: "Bob", age: 35, income: 60_000})
@@ -51,7 +48,7 @@ defmodule ManoleReadmeTest do
     # Execute it
     results = Repo.all(query)
     IO.inspect(results, label: "Results")
-    
+
     # Verify results:
     # Logic: (Name="Alice") OR (
     #   (Name="Bob") OR (Age > 30) OR (
@@ -71,7 +68,7 @@ defmodule ManoleReadmeTest do
     #        - Age < 27? Yes (25).
     #        - Income > 100000? No (40000).
     #    -> Carol fails all OR conditions -> Excluded.
-    
+
     assert length(results) == 2
     names = Enum.map(results, & &1.name) |> Enum.sort()
     assert names == ["Alice", "Bob"]

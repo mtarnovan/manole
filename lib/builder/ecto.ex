@@ -46,6 +46,7 @@ defmodule Manole.Builder.Ecto do
       ">=" -> dynamic([q], field(q, ^field) >= ^rule.value)
       "<" -> dynamic([q], field(q, ^field) < ^rule.value)
       "<=" -> dynamic([q], field(q, ^field) <= ^rule.value)
+      "contains" -> dynamic([q], ilike(field(q, ^field), ^"%#{rule.value}%"))
       # Ignore unknown operators or handle error
       _ -> nil
     end

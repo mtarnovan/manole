@@ -35,8 +35,8 @@ defmodule Manole.Builder.Ecto do
     end)
   end
 
-  defp build_rule_dynamic(rule, _q) do
-    field = String.to_existing_atom(rule.field)
+  defp build_rule_dynamic(rule, q) do
+    field = get_field_atom(q, rule.field)
     op = R.lookup_operator(rule.operator)
 
     case op do
@@ -50,8 +50,25 @@ defmodule Manole.Builder.Ecto do
       # Ignore unknown operators or handle error
       _ -> nil
     end
-  rescue
-    # Handle atom not existing or other errors gracefully
-    _ -> nil
   end
+
+  defp get_field_atom(q, field_str) do
+    schema = get_schema(q)
+
+    if schema do
+      fields = schema.__schema__(:fields)
+
+      case Enum.find(fields, fn f -> Atom.to_string(f) == field_str end) do
+        nil -> raise ArgumentError, "Field '#{field_str}' does not exist in schema #{inspect(schema)}"
+        atom -> atom
+      end
+    else
+      # Fallback for queries where schema cannot be determined
+      String.to_existing_atom(field_str)
+    end
+  end
+
+  defp get_schema(%Ecto.Query{from: %{source: {_table, schema}}}), do: schema
+  defp get_schema(queryable) when is_atom(queryable), do: queryable
+  defp get_schema(_), do: nil
 end

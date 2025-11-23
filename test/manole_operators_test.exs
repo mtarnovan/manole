@@ -92,16 +92,17 @@ defmodule ManoleOperatorsTest do
     assert [p1] == build_query!(Person, filter_unknown) |> Repo.all()
   end
 
-  test "unknown field ignored" do
-    p1 = Repo.insert!(%Person{name: "Mihai", age: 10})
+  test "unknown field raises error" do
+    Repo.insert!(%Person{name: "Mihai", age: 10})
 
     filter_unknown_field = %{
       combinator: :and,
       rules: [%{field: "non_existent_field", operator: "==", value: "Mihai"}]
     }
 
-    # Should ignore the rule safely
-    assert [p1] == build_query!(Person, filter_unknown_field) |> Repo.all()
+    assert_raise ArgumentError, ~r/does not exist in schema/, fn ->
+      build_query!(Person, filter_unknown_field)
+    end
   end
 
   defp build_query!(queryable, filter) do

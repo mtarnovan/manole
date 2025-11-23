@@ -12,6 +12,12 @@ defmodule Manole.Expr do
     @enforce_keys ~w(field operator value)a
     defstruct @enforce_keys
 
+    @type t :: %__MODULE__{
+            field: String.t(),
+            operator: String.t(),
+            value: any()
+          }
+
     @operators %{
       ["=", "==", "eq", :eq] => "==",
       ["!=", "neq", :neq] => "!=",
@@ -37,6 +43,11 @@ defmodule Manole.Expr do
     @moduledoc false
     @enforce_keys ~w(combinator children)a
     defstruct @enforce_keys
+
+    @type t :: %__MODULE__{
+            combinator: atom(),
+            children: [Manole.Expr.Rule.t() | t()]
+          }
   end
 
   defimpl Inspect, for: Group do

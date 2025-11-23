@@ -34,7 +34,8 @@ defmodule ManoleJsonInputTest do
     filter = %{
       "combinator" => "and",
       "rules" => [
-        %{"field" => "name", "operator" => "="} # missing value
+        # missing value
+        %{"field" => "name", "operator" => "="}
       ]
     }
 

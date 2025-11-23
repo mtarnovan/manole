@@ -132,3 +132,6 @@ is not in allowlist"}` is returned.
 - [x] implement allowlisting
 - [x] add support for joins and querying on association
 - [x] remove dependency on libgraph
+- [ ] CI/CD Pipeline (GitHub Actions)
+- [ ] Expanded Operator Support (`in`, `is_nil`)
+- [ ] Test Coverage & Docs (`mix coveralls`, `ExDoc`)

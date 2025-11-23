@@ -8,28 +8,23 @@ defmodule ManoleReadmeTest do
   end
 
   test "README example: Basic filter works" do
+    # Clean up (just in case)
+    Repo.delete_all(Person)
+
     # Seed data
     Repo.insert!(%Person{name: "Alice", age: 30, income: 50_000})
     Repo.insert!(%Person{name: "Bob", age: 35, income: 60_000})
     Repo.insert!(%Person{name: "Carol", age: 25, income: 40_000})
 
     filter = %{
-      combinator: :and,
+      combinator: :or,
       rules: [
         %{field: "name", operator: "=", value: "Alice"},
         %{
-          combinator: :or,
+          combinator: :and,
           rules: [
-            %{field: "name", operator: "=", value: "Bob"},
-            %{field: "age", operator: ">", value: "30"},
-            %{
-              combinator: :and,
-              rules: [
-                %{field: "name", operator: "=", value: "Carol"},
-                %{field: "age", operator: "<", value: "27"},
-                %{field: "income", operator: ">", value: "100000"}
-              ]
-            }
+            %{field: "age", operator: ">", value: "20"},
+            %{field: "income", operator: "<", value: "50000"}
           ]
         }
       ]
@@ -39,15 +34,19 @@ defmodule ManoleReadmeTest do
     assert {:ok, query} = Manole.build_query(Person, filter)
 
     # Inspect SQL for README
-    # {sql, params} = Repo.to_sql(:all, query)
-    # IO.puts("\n--- SQL OUTPUT ---")
-    # IO.puts(sql)
-    # IO.inspect(params, label: "Params")
-    # IO.puts("------------------\n")
+    {sql, params} = Repo.to_sql(:all, query)
+    IO.puts("\n--- SQL OUTPUT ---")
+    IO.puts(sql)
+    IO.inspect(params, label: "Params")
+    IO.puts("------------------\n")
 
     # Execute it
-    # results = Repo.all(query)
-    # IO.inspect(results, label: "Results")
-    assert Repo.all(query) |> is_list()
+    results = Repo.all(query)
+    IO.inspect(results, label: "Results")
+    
+    # Verify results (Alice matches name, Carol matches age/income criteria)
+    assert length(results) == 2
+    names = Enum.map(results, & &1.name) |> Enum.sort()
+    assert names == ["Alice", "Carol"]
   end
 end

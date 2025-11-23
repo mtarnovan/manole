@@ -11,21 +11,14 @@ A filter definition looks like this:
 
 ```elixir
 filter = %{
-  combinator: :and,
+  combinator: :or,
   rules: [
     %{field: "name", operator: "=", value: "Alice"},
     %{
-      combinator: :or,
+      combinator: :and,
       rules: [
-        %{field: "name", operator: "=", value: "Bob"},
-        %{field: "age", operator: ">", value: "30"},
-        %{combinator: :and,
-          rules: [
-            %{field: "name", operator: "=", value: "Carol"},
-            %{field: "age", operator: "<", value: "27"},
-            %{field: "income", operator: ">", value: "100000"},
-          ]
-        }
+        %{field: "age", operator: ">", value: "20"},
+        %{field: "income", operator: "<", value: "50000"}
       ]
     }
   ]
@@ -41,10 +34,9 @@ Given this filter and the following data:
 We can build an Ecto query from it:
 
 ```elixir
-iex(2)> Manole.build_query(Person, filter) |> Repo.all
+iex> Manole.build_query(Person, filter) |> Repo.all
 ...
-SELECT p0."id", p0."name", p0."age", p0."income" FROM "people" AS p0 WHERE
-((p0."name" = $1) AND (((p0."name" = $2) OR (p0."age" > $3)) OR (((p0."name" = $4) AND (p0."age" < $5)) AND (p0."income" > $6)))) ["Alice", "Bob", 30, "Carol", 27, 100000]
+SELECT p0."id", p0."name", p0."age", p0."income" FROM "people" AS p0 WHERE ((p0."name" = $1) OR ((p0."age" > $2) AND (p0."income" < $3))) ["Alice", 20, 50000]
 ...
 ```
 

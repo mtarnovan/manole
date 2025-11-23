@@ -1,11 +1,6 @@
 defmodule ManoleAssociationTest do
-  use ExUnit.Case, async: true
-  alias Ecto.Adapters.SQL.Sandbox
-  alias Manole.{Factory, Person, Repo}
-
-  setup do
-    :ok = Sandbox.checkout(Repo)
-  end
+  use Manole.DataCase, async: true
+  alias Manole.{Factory, Person}
 
   defp setup_data do
     {p1, _d1, _t1} =

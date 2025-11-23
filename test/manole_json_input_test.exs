@@ -1,5 +1,5 @@
 defmodule ManoleJsonInputTest do
-  use ExUnit.Case, async: true
+  use Manole.DataCase, async: true
   alias Manole.Person
 
   test "handles string keys in top level filter" do

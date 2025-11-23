@@ -1,11 +1,6 @@
 defmodule ManoleAllowlistingTest do
-  use ExUnit.Case, async: true
-  alias Ecto.Adapters.SQL.Sandbox
-  alias Manole.{Dog, Person, Repo}
-
-  setup do
-    :ok = Sandbox.checkout(Repo)
-  end
+  use Manole.DataCase, async: true
+  alias Manole.{Dog, Person}
 
   test "default allows everything (nil allowlist)" do
     Repo.insert!(%Person{name: "Alice", age: 30})

@@ -1,6 +1,5 @@
 defmodule ManoleParsingTest do
-  use ExUnit.Case, async: true
-  alias Ecto.Query.DynamicExpr
+  use Manole.DataCase, async: true
   alias Manole.Expr.{Group, Rule}
 
   @filter1 %{
@@ -54,11 +53,10 @@ defmodule ManoleParsingTest do
   end
 
   test "building dynamic query does not crash" do
-    alias Manole.Builder.Ecto
     # We pass a dummy queryable because we just want to ensure the builder runs
     # In a real scenario Ecto would inspect the bindings
     assert {:ok, tree} = Manole.parse_filter(@filter1)
-    dynamic = Ecto.build_dynamic(tree, "people")
-    assert %DynamicExpr{} = dynamic
+    dynamic = Manole.Builder.Ecto.build_dynamic(tree, "people")
+    assert %Ecto.Query.DynamicExpr{} = dynamic
   end
 end

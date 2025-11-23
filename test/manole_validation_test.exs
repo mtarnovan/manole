@@ -1,5 +1,5 @@
 defmodule ManoleValidationTest do
-  use ExUnit.Case, async: true
+  use Manole.DataCase, async: true
   alias Manole.Person
 
   test "validates missing keys" do

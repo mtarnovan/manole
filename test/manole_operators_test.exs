@@ -1,11 +1,6 @@
 defmodule ManoleOperatorsTest do
-  use ExUnit.Case, async: true
-  alias Ecto.Adapters.SQL.Sandbox
-  alias Manole.{Person, Repo}
-
-  setup do
-    :ok = Sandbox.checkout(Repo)
-  end
+  use Manole.DataCase, async: true
+  alias Manole.Person
 
   test "operators" do
     # Setup data

@@ -1,11 +1,6 @@
 defmodule ManoleTest do
-  use ExUnit.Case, async: true
-  alias Ecto.Adapters.SQL.Sandbox
-  alias Manole.{Dog, Person, Repo, Toy}
-
-  setup do
-    :ok = Sandbox.checkout(Repo)
-  end
+  use Manole.DataCase, async: true
+  alias Manole.{Dog, Person, Toy}
 
   @filter1 %{
     combinator: :or,

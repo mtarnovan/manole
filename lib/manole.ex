@@ -58,28 +58,28 @@ defmodule Manole do
   end
 
   defp check_field_path([field], allowlist) do
-    atom_field =
-      try do
-        String.to_existing_atom(field)
-      rescue
-        _ -> nil
+    Enum.find(allowlist, fn item ->
+      case item do
+        {key, _} -> Atom.to_string(key) == field
+        key when is_atom(key) -> Atom.to_string(key) == field
+        _ -> false
       end
-
-    atom_field in allowlist
+    end) != nil
   end
 
   defp check_field_path([assoc | rest], allowlist) do
-    assoc_atom =
-      try do
-        String.to_existing_atom(assoc)
-      rescue
-        _ -> nil
-      end
+    matching_entry =
+      Enum.find(allowlist, fn
+        {key, _} -> Atom.to_string(key) == assoc
+        _ -> false
+      end)
 
-    case Keyword.get(allowlist, assoc_atom) do
-      nil -> false
-      sub_allowlist when is_list(sub_allowlist) -> check_field_path(rest, sub_allowlist)
-      _ -> false
+    case matching_entry do
+      {_key, sub_allowlist} when is_list(sub_allowlist) ->
+        check_field_path(rest, sub_allowlist)
+
+      _ ->
+        false
     end
   end
 

@@ -122,15 +122,31 @@ defmodule Manole.Builder.Ecto do
   end
 
   defp perform_join(q, [], part, binding_name) do
-    assoc_atom = String.to_existing_atom(part)
+    schema = get_schema(q)
+    assoc_atom = validate_association!(schema, part)
     join(q, :inner, [root], assoc(root, ^assoc_atom), as: ^binding_name)
   end
 
   defp perform_join(q, path_so_far, part, binding_name) do
     parent_binding_name = path_to_binding(path_so_far)
-    assoc_atom = String.to_existing_atom(part)
+    schema = get_schema_for_binding(q, parent_binding_name)
+    assoc_atom = validate_association!(schema, part)
     ix = find_binding_index!(q, parent_binding_name)
     join(q, :inner, [{parent, ix}], assoc(parent, ^assoc_atom), as: ^binding_name)
+  end
+
+  defp validate_association!(nil, assoc_str) do
+    String.to_existing_atom(assoc_str)
+  end
+
+  defp validate_association!(schema, assoc_str) do
+    case Enum.find(schema.__schema__(:associations), fn a -> Atom.to_string(a) == assoc_str end) do
+      nil ->
+        raise ArgumentError, "Association '#{assoc_str}' does not exist in schema #{inspect(schema)}"
+
+      atom ->
+        atom
+    end
   end
 
   defp path_to_binding(path_list) do

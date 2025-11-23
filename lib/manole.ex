@@ -11,43 +11,53 @@ defmodule Manole do
 
   import Ecto.Query, only: [from: 2]
 
-  @spec build_query(Ecto.Queryable.t(), map(), [atom()]) ::
+  @spec build_query(Ecto.Queryable.t(), map(), keyword()) ::
           {:ok, Ecto.Query.t()} | {:error, term()}
 
-  def build_query(queryable, filter, whitelist \\ []) do
+  def build_query(queryable, filter, opts \\ []) do
     with {:ok, tree} <- parse_filter(filter),
-         :ok <- validate_whitelist(tree, whitelist) do
+         :ok <- validate_allowlist(tree, opts) do
       query = EctoBuilder.prepare_joins(queryable, tree)
       dynamic = EctoBuilder.build_dynamic(tree, query) || true
       {:ok, from(query, where: ^dynamic)}
     end
   end
 
-  defp validate_whitelist(_tree, []), do: :ok
+  defp validate_allowlist(tree, opts) do
+    allowlist = Keyword.get(opts, :allowlist)
 
-  defp validate_whitelist(%G{children: children}, whitelist) do
+    if is_nil(allowlist) do
+      :ok
+    else
+      validate_tree_against_allowlist(tree, allowlist)
+    end
+  end
+
+  defp validate_tree_against_allowlist(_tree, []), do: {:error, "Field access denied (empty allowlist)"}
+
+  defp validate_tree_against_allowlist(%G{children: children}, allowlist) do
     Enum.reduce_while(children, :ok, fn
       %G{} = group, :ok ->
-        case validate_whitelist(group, whitelist) do
+        case validate_tree_against_allowlist(group, allowlist) do
           :ok -> {:cont, :ok}
           error -> {:halt, error}
         end
 
       %R{field: field}, :ok ->
-        if field_allowed?(field, whitelist) do
+        if field_allowed?(field, allowlist) do
           {:cont, :ok}
         else
-          {:halt, {:error, "Field '#{field}' is not whitelisted"}}
+          {:halt, {:error, "Field '#{field}' is not in allowlist"}}
         end
     end)
   end
 
-  defp field_allowed?(field, whitelist) do
+  defp field_allowed?(field, allowlist) do
     parts = String.split(field, ".")
-    check_field_path(parts, whitelist)
+    check_field_path(parts, allowlist)
   end
 
-  defp check_field_path([field], whitelist) do
+  defp check_field_path([field], allowlist) do
     atom_field =
       try do
         String.to_existing_atom(field)
@@ -55,10 +65,10 @@ defmodule Manole do
         _ -> nil
       end
 
-    atom_field in whitelist
+    atom_field in allowlist
   end
 
-  defp check_field_path([assoc | rest], whitelist) do
+  defp check_field_path([assoc | rest], allowlist) do
     assoc_atom =
       try do
         String.to_existing_atom(assoc)
@@ -66,9 +76,9 @@ defmodule Manole do
         _ -> nil
       end
 
-    case Keyword.get(whitelist, assoc_atom) do
+    case Keyword.get(allowlist, assoc_atom) do
       nil -> false
-      sub_whitelist when is_list(sub_whitelist) -> check_field_path(rest, sub_whitelist)
+      sub_allowlist when is_list(sub_allowlist) -> check_field_path(rest, sub_allowlist)
       _ -> false
     end
   end

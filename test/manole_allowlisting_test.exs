@@ -1,0 +1,59 @@
+defmodule ManoleAllowlistingTest do
+  use ExUnit.Case, async: true
+  alias Ecto.Adapters.SQL.Sandbox
+  alias Manole.{Dog, Person, Repo}
+
+  setup do
+    :ok = Sandbox.checkout(Repo)
+  end
+
+  test "default allows everything (nil allowlist)" do
+    Repo.insert!(%Person{name: "Mihai", age: 30})
+    filter = %{combinator: :and, rules: [%{field: "name", operator: "=", value: "Mihai"}]}
+
+    # No options provided -> allows all
+    assert {:ok, query} = Manole.build_query(Person, filter)
+    assert Repo.aggregate(query, :count, :id) == 1
+  end
+
+  test "allows fields in explicit allowlist" do
+    Repo.insert!(%Person{name: "Mihai", age: 30})
+    filter = %{combinator: :and, rules: [%{field: "name", operator: "=", value: "Mihai"}]}
+
+    opts = [allowlist: [:name]]
+    assert {:ok, query} = Manole.build_query(Person, filter, opts)
+    assert Repo.aggregate(query, :count, :id) == 1
+  end
+
+  test "blocks fields not in allowlist" do
+    filter = %{combinator: :and, rules: [%{field: "age", operator: ">", value: "20"}]}
+    opts = [allowlist: [:name]] # 'age' is missing
+
+    assert {:error, "Field 'age' is not in allowlist"} = Manole.build_query(Person, filter, opts)
+  end
+
+  test "allows nested fields in allowlist" do
+    p1 = Repo.insert!(%Person{name: "Mihai", age: 30})
+    Repo.insert!(%Dog{name: "Gigi", person_id: p1.id})
+
+    filter = %{combinator: :and, rules: [%{field: "dogs.name", operator: "=", value: "Gigi"}]}
+    opts = [allowlist: [dogs: [:name]]]
+
+    assert {:ok, query} = Manole.build_query(Person, filter, opts)
+    assert Repo.aggregate(query, :count, :id) == 1
+  end
+
+  test "blocks nested fields not in allowlist" do
+    filter = %{combinator: :and, rules: [%{field: "dogs.age", operator: ">", value: "5"}]}
+    opts = [allowlist: [dogs: [:name]]] # 'dogs.age' is missing
+
+    assert {:error, "Field 'dogs.age' is not in allowlist"} = Manole.build_query(Person, filter, opts)
+  end
+
+  test "empty allowlist allows NOTHING" do
+    filter = %{combinator: :and, rules: [%{field: "name", operator: "=", value: "Mihai"}]}
+
+    # Empty list provided -> Strict mode, allow nothing
+    assert {:error, "Field access denied (empty allowlist)"} = Manole.build_query(Person, filter, allowlist: [])
+  end
+end

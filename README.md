@@ -66,25 +66,27 @@ would result in something like this:
 ...inner join comments...where (comments.inserted_at > '2016-08-18T15:33:17')
 ```
 
-A whitelist is a list of fields to allow on the input queryable and
+An allowlist is a list of fields to allow on the input queryable and
 the associations.
 
 ### Example:
-Assuming the input queryable is a `Post`, a whitelist given as:
+Assuming the input queryable is a `Post`, an allowlist given as:
 ```elixir
 [
-  :title,
-  comments: [:inserted_at, tags: [:name]]
+  allowlist: [
+    :title,
+    comments: [:inserted_at, tags: [:name]]
+  ]
 ]
 ```
 this would allow filtering on `post.title`, `post.comments.inserted_at` and
 `post.comments.tags.name`.
 
-If a field in the filter is not found in the whitelist, an error is returned.
+If a field in the filter is not found in the allowlist, an error is returned.
 <!-- MDOC -->
 # TODOs
 
-- [x] implement whitelisting
+- [x] implement allowlisting
 - [x] add support for joins and querying on association
 - [x] remove dependency on libgraph
 

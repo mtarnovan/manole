@@ -94,15 +94,20 @@ defmodule ManoleTest do
     d1 = Repo.insert!(%Dog{name: "Gigi", person_id: p1.id})
     _t1 = Repo.insert!(%Toy{name: "Ball", color: "pink", dog_id: d1.id})
 
-    filter1_results = Manole.build_query(Person, @filter1) |> Repo.all()
-    filter2_results = Manole.build_query(Person, @filter2) |> Repo.all()
-    filter3_results = Manole.build_query(Person, @filter3) |> Repo.all()
-    filter4_results = Manole.build_query(Person, @filter4) |> Repo.all()
+    filter1_results = build_query!(Person, @filter1) |> Repo.all()
+    filter2_results = build_query!(Person, @filter2) |> Repo.all()
+    filter3_results = build_query!(Person, @filter3) |> Repo.all()
+    filter4_results = build_query!(Person, @filter4) |> Repo.all()
 
     assert [p1, p2] == filter1_results
     assert [p1, p4] == filter2_results
     assert [p1, p2, p4, p5] == filter3_results
 
     assert [p4, p6] == filter4_results
+  end
+
+  defp build_query!(queryable, filter) do
+    {:ok, query} = Manole.build_query(queryable, filter)
+    query
   end
 end

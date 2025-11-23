@@ -25,7 +25,7 @@ defmodule ManoleParsingTest do
   }
 
   test "parsing filter structure" do
-    tree = Manole.parse_filter(@filter1)
+    assert {:ok, tree} = Manole.parse_filter(@filter1)
     assert %Group{combinator: :or, children: children} = tree
     assert length(children) == 2
 
@@ -57,7 +57,8 @@ defmodule ManoleParsingTest do
     alias Manole.Builder.Ecto
     # We pass a dummy queryable because we just want to ensure the builder runs
     # In a real scenario Ecto would inspect the bindings
-    dynamic = Ecto.build_dynamic(Manole.parse_filter(@filter1), "people")
+    assert {:ok, tree} = Manole.parse_filter(@filter1)
+    dynamic = Ecto.build_dynamic(tree, "people")
     assert %DynamicExpr{} = dynamic
   end
 end

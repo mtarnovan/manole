@@ -27,7 +27,8 @@ defmodule ManoleAllowlistingTest do
 
   test "blocks fields not in allowlist" do
     filter = %{combinator: :and, rules: [%{field: "age", operator: ">", value: "20"}]}
-    opts = [allowlist: [:name]] # 'age' is missing
+    # 'age' is missing
+    opts = [allowlist: [:name]]
 
     assert {:error, "Field 'age' is not in allowlist"} = Manole.build_query(Person, filter, opts)
   end
@@ -45,15 +46,18 @@ defmodule ManoleAllowlistingTest do
 
   test "blocks nested fields not in allowlist" do
     filter = %{combinator: :and, rules: [%{field: "dogs.age", operator: ">", value: "5"}]}
-    opts = [allowlist: [dogs: [:name]]] # 'dogs.age' is missing
+    # 'dogs.age' is missing
+    opts = [allowlist: [dogs: [:name]]]
 
-    assert {:error, "Field 'dogs.age' is not in allowlist"} = Manole.build_query(Person, filter, opts)
+    assert {:error, "Field 'dogs.age' is not in allowlist"} =
+             Manole.build_query(Person, filter, opts)
   end
 
   test "empty allowlist allows NOTHING" do
     filter = %{combinator: :and, rules: [%{field: "name", operator: "=", value: "Mihai"}]}
 
     # Empty list provided -> Strict mode, allow nothing
-    assert {:error, "Field access denied (empty allowlist)"} = Manole.build_query(Person, filter, allowlist: [])
+    assert {:error, "Field access denied (empty allowlist)"} =
+             Manole.build_query(Person, filter, allowlist: [])
   end
 end

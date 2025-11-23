@@ -80,18 +80,6 @@ defmodule ManoleOperatorsTest do
     assert [p1] == build_query!(Person, filter_empty) |> Repo.all()
   end
 
-  test "unknown operator ignored" do
-    p1 = Repo.insert!(%Person{name: "Mihai", age: 10})
-
-    filter_unknown = %{
-      combinator: :and,
-      rules: [%{field: "name", operator: "unknown_op", value: "Mihai"}]
-    }
-
-    # Should result in `true` (ignored rule) -> returns all
-    assert [p1] == build_query!(Person, filter_unknown) |> Repo.all()
-  end
-
   test "unknown field raises error" do
     Repo.insert!(%Person{name: "Mihai", age: 10})
 

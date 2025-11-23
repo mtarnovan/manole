@@ -66,22 +66,43 @@ defmodule Manole.Builder.Ecto do
       ">=" -> dynamic([q], field(q, ^field) >= ^value)
       "<" -> dynamic([q], field(q, ^field) < ^value)
       "<=" -> dynamic([q], field(q, ^field) <= ^value)
-      "contains" -> dynamic([q], ilike(field(q, ^field), ^"%#{value}%"))
+      "contains" -> dynamic([q], ilike(field(q, ^field), ^"%#{escape_like(value)}%"))
       _ -> nil
     end
   end
 
   defp build_binding_dynamic(binding_name, field, op, value) do
     case op do
-      "==" -> dynamic([], field(as(^binding_name), ^field) == ^value)
-      "!=" -> dynamic([], field(as(^binding_name), ^field) != ^value)
-      ">" -> dynamic([], field(as(^binding_name), ^field) > ^value)
-      ">=" -> dynamic([], field(as(^binding_name), ^field) >= ^value)
-      "<" -> dynamic([], field(as(^binding_name), ^field) < ^value)
-      "<=" -> dynamic([], field(as(^binding_name), ^field) <= ^value)
-      "contains" -> dynamic([], ilike(field(as(^binding_name), ^field), ^"%#{value}%"))
-      _ -> nil
+      "==" ->
+        dynamic([], field(as(^binding_name), ^field) == ^value)
+
+      "!=" ->
+        dynamic([], field(as(^binding_name), ^field) != ^value)
+
+      ">" ->
+        dynamic([], field(as(^binding_name), ^field) > ^value)
+
+      ">=" ->
+        dynamic([], field(as(^binding_name), ^field) >= ^value)
+
+      "<" ->
+        dynamic([], field(as(^binding_name), ^field) < ^value)
+
+      "<=" ->
+        dynamic([], field(as(^binding_name), ^field) <= ^value)
+
+      "contains" ->
+        dynamic([], ilike(field(as(^binding_name), ^field), ^"%#{escape_like(value)}%"))
+
+      _ ->
+        nil
     end
+  end
+
+  defp escape_like(value) do
+    value
+    |> String.replace("%", "\\%")
+    |> String.replace("_", "\\_")
   end
 
   defp extract_association_paths(%G{children: children}) do
@@ -142,7 +163,8 @@ defmodule Manole.Builder.Ecto do
   defp validate_association!(schema, assoc_str) do
     case Enum.find(schema.__schema__(:associations), fn a -> Atom.to_string(a) == assoc_str end) do
       nil ->
-        raise ArgumentError, "Association '#{assoc_str}' does not exist in schema #{inspect(schema)}"
+        raise ArgumentError,
+              "Association '#{assoc_str}' does not exist in schema #{inspect(schema)}"
 
       atom ->
         atom

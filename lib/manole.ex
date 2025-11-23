@@ -33,7 +33,8 @@ defmodule Manole do
     end
   end
 
-  defp validate_tree_against_allowlist(_tree, []), do: {:error, "Field access denied (empty allowlist)"}
+  defp validate_tree_against_allowlist(_tree, []),
+    do: {:error, "Field access denied (empty allowlist)"}
 
   defp validate_tree_against_allowlist(%G{children: children}, allowlist) do
     Enum.reduce_while(children, :ok, fn
@@ -109,8 +110,17 @@ defmodule Manole do
   defp parse_child(rule) do
     with {:ok, field} <- validate_required(rule, :field),
          {:ok, operator} <- validate_required(rule, :operator),
-         {:ok, value} <- validate_required(rule, :value) do
+         {:ok, value} <- validate_required(rule, :value),
+         :ok <- validate_operator(operator) do
       {:ok, %R{field: field, operator: operator, value: value}}
+    end
+  end
+
+  defp validate_operator(op) do
+    if R.lookup_operator(op) do
+      :ok
+    else
+      {:error, "Invalid operator: #{inspect(op)}"}
     end
   end
 

@@ -31,8 +31,6 @@ defmodule ManoleReadmeTest do
 
     assert {:ok, query} = Manole.build_query(Person, filter)
 
-    {sql, params} = Repo.to_sql(:all, query)
-
     results = Repo.all(query)
 
     assert length(results) == 2

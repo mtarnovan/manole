@@ -63,4 +63,13 @@ defmodule ManoleValidationTest do
 
     assert {:ok, %Ecto.Query{}} = Manole.build_query(Person, filter)
   end
+
+  test "rejects invalid operator" do
+    filter = %{
+      combinator: :and,
+      rules: [%{field: "name", operator: "invalid_op", value: "Mihai"}]
+    }
+
+    assert {:error, "Invalid operator: \"invalid_op\""} = Manole.build_query(Person, filter)
+  end
 end

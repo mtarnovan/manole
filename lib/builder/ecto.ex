@@ -3,17 +3,18 @@ defmodule Manole.Builder.Ecto do
   Appends the filter structure to an `Ecto.Queryable`
   """
 
+  alias Ecto.Queryable
   alias Manole.Expr.Group, as: G
   alias Manole.Expr.Rule, as: R
   import Ecto.Query
 
-  @spec prepare_joins(Ecto.Queryable.t(), G.t()) :: Ecto.Query.t()
+  @spec prepare_joins(Queryable.t(), G.t()) :: Ecto.Query.t()
   def prepare_joins(queryable, tree) do
     # 1. Extract all unique association paths from rules (e.g. ["comments", "comments.tags"])
     paths = extract_association_paths(tree)
 
     # 2. Iteratively join them if not present
-    Enum.reduce(paths, Ecto.Queryable.to_query(queryable), fn path_list, query ->
+    Enum.reduce(paths, Queryable.to_query(queryable), fn path_list, query ->
       join_association_path(query, path_list)
     end)
   end
@@ -85,11 +86,15 @@ defmodule Manole.Builder.Ecto do
 
   defp extract_association_paths(%G{children: children}) do
     Enum.flat_map(children, fn
-      %G{} = group -> extract_association_paths(group)
+      %G{} = group ->
+        extract_association_paths(group)
+
       %R{field: field} ->
         case String.split(field, ".") do
-          [_] -> [] # Root field
-          parts -> [List.delete_at(parts, length(parts) - 1)] # Return path components excluding field name
+          # Root field
+          [_] -> []
+          # Return path components excluding field name
+          parts -> [List.delete_at(parts, length(parts) - 1)]
         end
     end)
     |> Enum.uniq()
@@ -99,36 +104,33 @@ defmodule Manole.Builder.Ecto do
 
   defp join_association_path(query, path_list) do
     # path_list: ["comments", "tags"]
-
-    Enum.reduce(path_list, {[], query}, fn part, {path_so_far, q} ->
-      current_path = path_so_far ++ [part]
-      binding_name = path_to_binding(current_path)
-
-      if has_named_binding?(q, binding_name) do
-        {current_path, q}
-      else
-        # Need to join.
-        # Parent binding is...
-        parent_binding_name =
-          case path_so_far do
-            [] -> nil
-            _ -> path_to_binding(path_so_far)
-          end
-
-        assoc_atom = String.to_existing_atom(part)
-
-        q_new =
-          if parent_binding_name do
-             ix = find_binding_index!(q, parent_binding_name)
-             join(q, :inner, [{parent, ix}], assoc(parent, ^assoc_atom), as: ^binding_name)
-          else
-             join(q, :inner, [root], assoc(root, ^assoc_atom), as: ^binding_name)
-          end
-
-        {current_path, q_new}
-      end
-    end)
+    path_list
+    |> Enum.reduce({[], query}, &join_part/2)
     |> elem(1)
+  end
+
+  defp join_part(part, {path_so_far, q}) do
+    current_path = path_so_far ++ [part]
+    binding_name = path_to_binding(current_path)
+
+    if has_named_binding?(q, binding_name) do
+      {current_path, q}
+    else
+      q_new = perform_join(q, path_so_far, part, binding_name)
+      {current_path, q_new}
+    end
+  end
+
+  defp perform_join(q, [], part, binding_name) do
+    assoc_atom = String.to_existing_atom(part)
+    join(q, :inner, [root], assoc(root, ^assoc_atom), as: ^binding_name)
+  end
+
+  defp perform_join(q, path_so_far, part, binding_name) do
+    parent_binding_name = path_to_binding(path_so_far)
+    assoc_atom = String.to_existing_atom(part)
+    ix = find_binding_index!(q, parent_binding_name)
+    join(q, :inner, [{parent, ix}], assoc(parent, ^assoc_atom), as: ^binding_name)
   end
 
   defp path_to_binding(path_list) do
@@ -139,9 +141,11 @@ defmodule Manole.Builder.Ecto do
 
   defp resolve_binding_and_field(q, field_path) do
     parts = String.split(field_path, ".")
+
     case parts do
       [field] ->
-        schema = get_schema(q) # Root schema
+        # Root schema
+        schema = get_schema(q)
         field_atom = validate_field!(schema, field)
         {:root, field_atom}
 
@@ -173,15 +177,17 @@ defmodule Manole.Builder.Ecto do
     end
   end
 
+  defp validate_field!(nil, field_str) do
+    String.to_existing_atom(field_str)
+  end
+
   defp validate_field!(schema, field_str) do
-    if schema do
-      case Enum.find(schema.__schema__(:fields), fn f -> Atom.to_string(f) == field_str end) do
-        nil -> raise ArgumentError, "Field '#{field_str}' does not exist in schema #{inspect(schema)}"
-        atom -> atom
-      end
-    else
-       # Fallback
-       String.to_existing_atom(field_str)
+    case Enum.find(schema.__schema__(:fields), fn f -> Atom.to_string(f) == field_str end) do
+      nil ->
+        raise ArgumentError, "Field '#{field_str}' does not exist in schema #{inspect(schema)}"
+
+      atom ->
+        atom
     end
   end
 
@@ -197,22 +203,19 @@ defmodule Manole.Builder.Ecto do
     # Iterating joins to find the one with `as: binding_name`
     # query.joins is a list of Ecto.Query.JoinExpr
 
-    Enum.find_value(query.joins, fn join ->
-      if join.as == binding_name do
-         case join.source do
-           {_table, schema} -> schema
-           _ -> nil
-         end
-      else
-        nil
-      end
+    Enum.find_value(query.joins, fn
+      %{as: ^binding_name, source: {_table, schema}} -> schema
+      _ -> nil
     end)
   end
 
   defp find_binding_index!(query, binding_name) do
     case Map.get(query.aliases, binding_name) do
-      nil -> raise "Binding #{inspect(binding_name)} not found in aliases: #{inspect(query.aliases)}"
-      ix -> ix
+      nil ->
+        raise "Binding #{inspect(binding_name)} not found in aliases: #{inspect(query.aliases)}"
+
+      ix ->
+        ix
     end
   end
 end

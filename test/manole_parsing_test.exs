@@ -1,5 +1,5 @@
 defmodule ManoleParsingTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   alias Ecto.Query.DynamicExpr
   alias Manole.Expr.{Group, Rule}
 

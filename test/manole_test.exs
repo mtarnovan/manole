@@ -1,13 +1,10 @@
 defmodule ManoleTest do
-  use ExUnit.Case
-  alias Ecto.Adapters.SQL
+  use ExUnit.Case, async: true
   alias Ecto.Adapters.SQL.Sandbox
   alias Manole.{Dog, Person, Repo, Toy}
 
   setup do
-    Sandbox.checkout(Repo)
-    SQL.query(Repo, "TRUNCATE TABLE people RESTART IDENTITY CASCADE", [])
-    :ok
+    :ok = Sandbox.checkout(Repo)
   end
 
   @filter1 %{

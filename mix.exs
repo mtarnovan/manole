@@ -14,8 +14,10 @@ defmodule Manole.MixProject do
         coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
-        "coveralls.html": :test
-      ]
+        "coveralls.html": :test,
+        lint: :test
+      ],
+      aliases: aliases()
     ]
   end
 
@@ -35,6 +37,12 @@ defmodule Manole.MixProject do
       {:excoveralls, "~> 0.10", only: :test},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false}
+    ]
+  end
+
+  defp aliases do
+    [
+      lint: ["compile --warnings-as-errors", "credo --strict", "format --check-formatted"]
     ]
   end
 end

@@ -23,14 +23,7 @@ defmodule Manole.Expr do
     }
 
     def lookup_operator(operator, operators \\ @operators) do
-      with {_k, v} <-
-             Enum.find(operators, fn {k, _v} ->
-               operator in k
-             end) do
-        v
-      else
-        nil -> nil
-      end
+      with {_k, v} <- Enum.find(operators, fn {k, _v} -> operator in k end), do: v
     end
   end
 

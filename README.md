@@ -85,5 +85,6 @@ If a field in the filter is not found in the whitelist, an error is returned.
 # TODOs
 
 - [ ] implement whitelisting
-- [ ] add support for joins and querying on association
-- [ ] remove dependency on libgraph
+- [x] add support for joins and querying on association
+- [x] remove dependency on libgraph
+

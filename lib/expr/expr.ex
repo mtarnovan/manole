@@ -19,17 +19,30 @@ defmodule Manole.Expr do
           }
 
     @operators %{
-      ["=", "==", "eq", :eq] => "==",
-      ["!=", "neq", :neq] => "!=",
-      [">", "gt", :gt] => ">",
-      [">=", "gte", :gte] => ">=",
-      ["<", "lt", :lt] => "<",
-      ["<=", "lte", :lte] => "<=",
-      ["contains"] => "contains"
+      "=" => "==",
+      "==" => "==",
+      "eq" => "==",
+      :eq => "==",
+      "!=" => "!=",
+      "neq" => "!=",
+      :neq => "!=",
+      ">" => ">",
+      "gt" => ">",
+      :gt => ">",
+      ">=" => ">=",
+      "gte" => ">=",
+      :gte => ">=",
+      "<" => "<",
+      "lt" => "<",
+      :lt => "<",
+      "<=" => "<=",
+      "lte" => "<=",
+      :lte => "<=",
+      "contains" => "contains"
     }
 
     def lookup_operator(operator, operators \\ @operators) do
-      with {_k, v} <- Enum.find(operators, fn {k, _v} -> operator in k end), do: v
+      Map.get(operators, operator)
     end
   end
 

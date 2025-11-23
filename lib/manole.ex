@@ -16,8 +16,9 @@ defmodule Manole do
 
   def build_query(queryable, filter, _whitelist \\ []) do
     with {:ok, tree} <- parse_filter(filter) do
-      dynamic = EctoBuilder.build_dynamic(tree, queryable) || true
-      {:ok, from(queryable, where: ^dynamic)}
+      query = EctoBuilder.prepare_joins(queryable, tree)
+      dynamic = EctoBuilder.build_dynamic(tree, query) || true
+      {:ok, from(query, where: ^dynamic)}
     end
   end
 

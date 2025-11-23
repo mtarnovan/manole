@@ -6,16 +6,16 @@ defmodule ManoleParsingTest do
   @filter1 %{
     combinator: :or,
     rules: [
-      %{field: "name", operator: "=", value: "Mihai"},
+      %{field: "name", operator: "=", value: "Alice"},
       %{
         combinator: :and,
         rules: [
-          %{field: "name", operator: "=", value: "Paul"},
+          %{field: "name", operator: "=", value: "Bob"},
           %{field: "age", operator: ">", value: "30"},
           %{
             combinator: :and,
             rules: [
-              %{field: "name", operator: "=", value: "Adriana"},
+              %{field: "name", operator: "=", value: "Carol"},
               %{field: "age", operator: ">=", value: "30"}
             ]
           }
@@ -31,7 +31,7 @@ defmodule ManoleParsingTest do
 
     # Check for rule
     assert Enum.any?(children, fn
-             %Rule{field: "name", value: "Mihai"} -> true
+             %Rule{field: "name", value: "Alice"} -> true
              _ -> false
            end)
 
@@ -48,7 +48,7 @@ defmodule ManoleParsingTest do
 
     # Check nested group children
     assert Enum.any?(nested_group.children, fn
-             %Rule{field: "name", value: "Paul"} -> true
+             %Rule{field: "name", value: "Bob"} -> true
              _ -> false
            end)
   end

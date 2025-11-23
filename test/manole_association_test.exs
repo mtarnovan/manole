@@ -9,11 +9,11 @@ defmodule ManoleAssociationTest do
 
   test "filtering by associated field" do
     # Setup data
-    p1 = Repo.insert!(%Person{name: "Mihai", age: 30})
+    p1 = Repo.insert!(%Person{name: "Alice", age: 30})
     d1 = Repo.insert!(%Dog{name: "Gigi", person_id: p1.id})
     _t1 = Repo.insert!(%Toy{name: "Ball", color: "pink", dog_id: d1.id})
 
-    p2 = Repo.insert!(%Person{name: "Paul", age: 30})
+    p2 = Repo.insert!(%Person{name: "Bob", age: 30})
     d2 = Repo.insert!(%Dog{name: "Rex", person_id: p2.id})
     _t2 = Repo.insert!(%Toy{name: "Bone", color: "white", dog_id: d2.id})
 

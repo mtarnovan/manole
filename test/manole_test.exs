@@ -10,16 +10,16 @@ defmodule ManoleTest do
   @filter1 %{
     combinator: :or,
     rules: [
-      %{field: "name", operator: "=", value: "Mihai"},
+      %{field: "name", operator: "=", value: "Alice"},
       %{
         combinator: :and,
         rules: [
-          %{field: "name", operator: "=", value: "Paul"},
+          %{field: "name", operator: "=", value: "Bob"},
           %{field: "age", operator: ">", value: "30"},
           %{
             combinator: :and,
             rules: [
-              %{field: "name", operator: "=", value: "Adriana"},
+              %{field: "name", operator: "=", value: "Carol"},
               %{field: "age", operator: ">=", value: "30"}
             ]
           }
@@ -35,14 +35,14 @@ defmodule ManoleTest do
         combinator: :and,
         rules: [
           %{field: "age", operator: ">", value: "35"},
-          %{field: "name", operator: "=", value: "Paul"}
+          %{field: "name", operator: "=", value: "Bob"}
         ]
       },
       %{
         combinator: :and,
         rules: [
           %{field: "age", operator: "<", value: "30"},
-          %{field: "name", operator: "=", value: "Mihai"}
+          %{field: "name", operator: "=", value: "Alice"}
         ]
       }
     ]
@@ -51,18 +51,18 @@ defmodule ManoleTest do
   @filter3 %{
     combinator: :or,
     rules: [
-      %{field: "name", operator: "=", value: "Mihai"},
+      %{field: "name", operator: "=", value: "Alice"},
       %{
         combinator: :and,
         rules: [
-          %{field: "name", operator: "=", value: "Paul"},
+          %{field: "name", operator: "=", value: "Bob"},
           %{field: "age", operator: ">", value: "30"}
         ]
       },
       %{
         combinator: :and,
         rules: [
-          %{field: "name", operator: "=", value: "Adriana"},
+          %{field: "name", operator: "=", value: "Carol"},
           %{field: "age", operator: "<", value: "30"}
         ]
       }
@@ -76,20 +76,20 @@ defmodule ManoleTest do
       %{
         combinator: :or,
         rules: [
-          %{field: "name", operator: "=", value: "Paul"},
-          %{field: "name", operator: "=", value: "Adriana"}
+          %{field: "name", operator: "=", value: "Bob"},
+          %{field: "name", operator: "=", value: "Carol"}
         ]
       }
     ]
   }
 
   test "Ecto query builder integration" do
-    p1 = Repo.insert!(%Person{name: "Mihai", age: 10})
-    p2 = Repo.insert!(%Person{name: "Mihai", age: 50})
-    _p3 = Repo.insert!(%Person{name: "Paul", age: 10})
-    p4 = Repo.insert!(%Person{name: "Paul", age: 50})
-    p5 = Repo.insert!(%Person{name: "Adriana", age: 10})
-    p6 = Repo.insert!(%Person{name: "Adriana", age: 50})
+    p1 = Repo.insert!(%Person{name: "Alice", age: 10})
+    p2 = Repo.insert!(%Person{name: "Alice", age: 50})
+    _p3 = Repo.insert!(%Person{name: "Bob", age: 10})
+    p4 = Repo.insert!(%Person{name: "Bob", age: 50})
+    p5 = Repo.insert!(%Person{name: "Carol", age: 10})
+    p6 = Repo.insert!(%Person{name: "Carol", age: 50})
 
     d1 = Repo.insert!(%Dog{name: "Gigi", person_id: p1.id})
     _t1 = Repo.insert!(%Toy{name: "Ball", color: "pink", dog_id: d1.id})

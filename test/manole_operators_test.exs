@@ -9,14 +9,14 @@ defmodule ManoleOperatorsTest do
 
   test "operators" do
     # Setup data
-    p1 = Repo.insert!(%Person{name: "Mihai", age: 10})
-    p2 = Repo.insert!(%Person{name: "Paul", age: 20})
-    p3 = Repo.insert!(%Person{name: "Adriana", age: 30})
+    p1 = Repo.insert!(%Person{name: "Alice", age: 10})
+    p2 = Repo.insert!(%Person{name: "Bob", age: 20})
+    p3 = Repo.insert!(%Person{name: "Carol", age: 30})
 
     # 1. Equals (==)
     filter_eq = %{
       combinator: :and,
-      rules: [%{field: "name", operator: "==", value: "Mihai"}]
+      rules: [%{field: "name", operator: "==", value: "Alice"}]
     }
 
     assert [p1] == build_query!(Person, filter_eq) |> Repo.all()
@@ -24,7 +24,7 @@ defmodule ManoleOperatorsTest do
     # 2. Not Equals (!=)
     filter_neq = %{
       combinator: :and,
-      rules: [%{field: "name", operator: "!=", value: "Mihai"}]
+      rules: [%{field: "name", operator: "!=", value: "Alice"}]
     }
 
     # Order might vary, so sort by ID
@@ -68,7 +68,7 @@ defmodule ManoleOperatorsTest do
     # 7. Contains (contains)
     filter_contains = %{
       combinator: :and,
-      rules: [%{field: "name", operator: "contains", value: "au"}]
+      rules: [%{field: "name", operator: "contains", value: "ob"}]
     }
 
     assert [p2] == build_query!(Person, filter_contains) |> Repo.all()
@@ -97,17 +97,17 @@ defmodule ManoleOperatorsTest do
   end
 
   test "empty filter returns all" do
-    p1 = Repo.insert!(%Person{name: "Mihai", age: 10})
+    p1 = Repo.insert!(%Person{name: "Alice", age: 10})
     filter_empty = %{combinator: :and, rules: []}
     assert [p1] == build_query!(Person, filter_empty) |> Repo.all()
   end
 
   test "unknown field raises error" do
-    Repo.insert!(%Person{name: "Mihai", age: 10})
+    Repo.insert!(%Person{name: "Alice", age: 10})
 
     filter_unknown_field = %{
       combinator: :and,
-      rules: [%{field: "non_existent_field", operator: "==", value: "Mihai"}]
+      rules: [%{field: "non_existent_field", operator: "==", value: "Alice"}]
     }
 
     assert_raise ArgumentError, ~r/does not exist in schema/, fn ->

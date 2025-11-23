@@ -6,7 +6,7 @@ defmodule ManoleJsonInputTest do
     filter = %{
       "combinator" => "and",
       "rules" => [
-        %{"field" => "name", "operator" => "=", "value" => "Mihai"}
+        %{"field" => "name", "operator" => "=", "value" => "Alice"}
       ]
     }
 
@@ -20,7 +20,7 @@ defmodule ManoleJsonInputTest do
         %{
           "combinator" => "and",
           "rules" => [
-            %{"field" => "name", "operator" => "=", "value" => "Paul"},
+            %{"field" => "name", "operator" => "=", "value" => "Bob"},
             %{"field" => "age", "operator" => ">", "value" => "30"}
           ]
         }
@@ -45,7 +45,7 @@ defmodule ManoleJsonInputTest do
     filter = %{
       combinator: :and,
       rules: [
-        %{"field" => "name", "operator" => "=", value: "Mihai"},
+        %{"field" => "name", "operator" => "=", value: "Alice"},
         %{"value" => "20", field: "age", operator: ">"}
       ]
     }

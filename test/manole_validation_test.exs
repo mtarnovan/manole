@@ -46,7 +46,7 @@ defmodule ManoleValidationTest do
     filter = %{
       combinator: :and,
       rules: [
-        %{field: "name", operator: "=", value: "Mihai"}
+        %{field: "name", operator: "=", value: "Alice"}
       ]
     }
 
@@ -57,7 +57,7 @@ defmodule ManoleValidationTest do
     filter = %{
       combinator: :and,
       rules: [
-        %{"field" => "name", "operator" => "=", "value" => "Mihai"}
+        %{"field" => "name", "operator" => "=", "value" => "Alice"}
       ]
     }
 
@@ -67,7 +67,7 @@ defmodule ManoleValidationTest do
   test "rejects invalid operator" do
     filter = %{
       combinator: :and,
-      rules: [%{field: "name", operator: "invalid_op", value: "Mihai"}]
+      rules: [%{field: "name", operator: "invalid_op", value: "Alice"}]
     }
 
     assert {:error, "Invalid operator: \"invalid_op\""} = Manole.build_query(Person, filter)

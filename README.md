@@ -2,9 +2,10 @@
 
 Manole is a query builder for Ecto.
 
-__N.B. This project is in early/exploratory stages. Use with caution or not at all (for now).__
+**N.B. This project is in early/exploratory stages. Use with caution or not at all (for now).**
 
 <!-- MDOC -->
+
 Allows parsing of a filter and appending it to the given queryable.
 
 A filter definition looks like this:
@@ -15,10 +16,17 @@ filter = %{
   rules: [
     %{field: "name", operator: "=", value: "Alice"},
     %{
-      combinator: :and,
+      combinator: :or,
       rules: [
-        %{field: "age", operator: ">", value: "20"},
-        %{field: "income", operator: "<", value: "50000"}
+        %{field: "name", operator: "=", value: "Bob"},
+        %{field: "age", operator: ">", value: "30"},
+        %{combinator: :and,
+          rules: [
+            %{field: "name", operator: "=", value: "Carol"},
+            %{field: "age", operator: "<", value: "27"},
+            %{field: "income", operator: ">", value: "100000"},
+          ]
+        }
       ]
     }
   ]
@@ -27,18 +35,48 @@ filter = %{
 
 Given this filter and the following data:
 
-* Name: Alice, Age: 30, Income: 50000
-* Name: Bob, Age: 35, Income: 60000
-* Name: Carol, Age: 25, Income: 40000
+- Name: Alice, Age: 30, Income: 50000
+- Name: Bob, Age: 35, Income: 60000
+- Name: Carol, Age: 25, Income: 40000
+
+```elixir
+alias Manole.{Repo, Person}
+Repo.insert!(%Person{name: "Alice", age: 30, income: 50000})
+Repo.insert!(%Person{name: "Bob", age: 35, income: 60000})
+Repo.insert!(%Manole.Person{name: "Carol", age: 25, income: 40000})
+```
 
 We can build an Ecto query from it:
 
 ```elixir
-iex> Manole.build_query(Person, filter) |> Repo.all
-...
-SELECT p0."id", p0."name", p0."age", p0."income" FROM "people" AS p0 WHERE ((p0."name" = $1) OR ((p0."age" > $2) AND (p0."income" < $3))) ["Alice", 20, 50000]
-...
+iex> {:ok, query} = Manole.build_query(Person, filter)
+{:ok,
+ #Ecto.Query<from p0 in Manole.Person,
+  where: p0.name == ^"Alice" and
+  (p0.name == ^"Bob" or p0.age > ^"30" or
+     (p0.name == ^"Carol" and p0.age < ^"27" and p0.income > ^"100000"))>}
+iex> Repo.all(query)
+[
+  %Manole.Person{
+    __meta__: #Ecto.Schema.Metadata<:loaded, "people">,
+    id: 521,
+    name: "Alice",
+    age: 30,
+    income: 50000,
+    dogs: #Ecto.Association.NotLoaded<association :dogs is not loaded>
+  },
+  %Manole.Person{
+    __meta__: #Ecto.Schema.Metadata<:loaded, "people">,
+    id: 522,
+    name: "Bob",
+    age: 35,
+    income: 60000,
+    dogs: #Ecto.Association.NotLoaded<association :dogs is not loaded>
+  }
+]
 ```
+
+Note: `Carol` is excluded because she does not match "Alice", "Bob", or "Age > 30", and fails the income requirement (> 100000) of the nested AND block.
 
 ### Association Support
 
@@ -58,6 +96,7 @@ join, and if it doesn't, it is added automatically.
   ]
 }
 ```
+
 would result in something like this:
 
 ```sql
@@ -70,7 +109,9 @@ An allowlist is a list of fields to allow on the input queryable and
 the associations. By default (if no allowlist is provided), all fields are allowed. If an allowlist is provided, only fields in the list are accessible.
 
 #### Example:
+
 Assuming the input queryable is a `Post`, an allowlist given as:
+
 ```elixir
 opts = [
   allowlist: [
@@ -80,6 +121,7 @@ opts = [
 ]
 Manole.build_query(Post, filter, opts)
 ```
+
 this would allow filtering on `post.title`, `post.comments.inserted_at` and
 `post.comments.tags.name`.
 
@@ -96,9 +138,9 @@ If a field in the filter is not found in the allowlist, `{:error, "Field '...' i
 - `contains`: Case-insensitive substring match (`ilike %value%`). Wildcards `%` and `_` in the value are escaped.
 
 <!-- MDOC -->
+
 # TODOs
 
 - [x] implement allowlisting
 - [x] add support for joins and querying on association
 - [x] remove dependency on libgraph
-

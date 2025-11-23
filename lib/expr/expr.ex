@@ -9,7 +9,7 @@ defmodule Manole.Expr do
 
   defmodule Rule do
     @moduledoc false
-    @enforce_keys ~w(field operator value id)a
+    @enforce_keys ~w(field operator value)a
     defstruct @enforce_keys
 
     @operators %{
@@ -36,19 +36,19 @@ defmodule Manole.Expr do
 
   defimpl Inspect, for: Rule do
     def inspect(rule, _opts) do
-      "Rule##{rule.id} <#{rule.field}#{rule.operator}#{rule.value}>"
+      "Rule <#{rule.field}#{rule.operator}#{rule.value}>"
     end
   end
 
   defmodule Group do
     @moduledoc false
-    @enforce_keys ~w(combinator id)a
+    @enforce_keys ~w(combinator children)a
     defstruct @enforce_keys
   end
 
   defimpl Inspect, for: Group do
     def inspect(group, _opts) do
-      "Group##{group.id} <#{group.combinator}>"
+      "Group <#{group.combinator}, children: #{length(group.children)}>"
     end
   end
 end

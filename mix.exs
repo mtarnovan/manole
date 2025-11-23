@@ -30,7 +30,7 @@ defmodule Manole.MixProject do
       {:libgraph, "~> 0.7"},
 
       {:excoveralls, "~> 0.10", only: :test},
-      {:credo, "~> 0.10", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false}
     ]
   end

@@ -14,11 +14,62 @@ defmodule Manole do
   @spec build_query(Ecto.Queryable.t(), map(), [atom()]) ::
           {:ok, Ecto.Query.t()} | {:error, term()}
 
-  def build_query(queryable, filter, _whitelist \\ []) do
-    with {:ok, tree} <- parse_filter(filter) do
+  def build_query(queryable, filter, whitelist \\ []) do
+    with {:ok, tree} <- parse_filter(filter),
+         :ok <- validate_whitelist(tree, whitelist) do
       query = EctoBuilder.prepare_joins(queryable, tree)
       dynamic = EctoBuilder.build_dynamic(tree, query) || true
       {:ok, from(query, where: ^dynamic)}
+    end
+  end
+
+  defp validate_whitelist(_tree, []), do: :ok
+
+  defp validate_whitelist(%G{children: children}, whitelist) do
+    Enum.reduce_while(children, :ok, fn
+      %G{} = group, :ok ->
+        case validate_whitelist(group, whitelist) do
+          :ok -> {:cont, :ok}
+          error -> {:halt, error}
+        end
+
+      %R{field: field}, :ok ->
+        if field_allowed?(field, whitelist) do
+          {:cont, :ok}
+        else
+          {:halt, {:error, "Field '#{field}' is not whitelisted"}}
+        end
+    end)
+  end
+
+  defp field_allowed?(field, whitelist) do
+    parts = String.split(field, ".")
+    check_field_path(parts, whitelist)
+  end
+
+  defp check_field_path([field], whitelist) do
+    atom_field =
+      try do
+        String.to_existing_atom(field)
+      rescue
+        _ -> nil
+      end
+
+    atom_field in whitelist
+  end
+
+  defp check_field_path([assoc | rest], whitelist) do
+    assoc_atom =
+      try do
+        String.to_existing_atom(assoc)
+      rescue
+        _ -> nil
+      end
+
+    case Keyword.get(whitelist, assoc_atom) do
+      nil -> false
+      sub_whitelist when is_list(sub_whitelist) -> check_field_path(rest, sub_whitelist)
+      _ -> false
     end
   end
 

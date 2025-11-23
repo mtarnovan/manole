@@ -84,7 +84,7 @@ If a field in the filter is not found in the whitelist, an error is returned.
 <!-- MDOC -->
 # TODOs
 
-- [ ] implement whitelisting
+- [x] implement whitelisting
 - [x] add support for joins and querying on association
 - [x] remove dependency on libgraph
 

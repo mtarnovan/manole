@@ -53,10 +53,10 @@ We can build an Ecto query from it:
 iex> {:ok, query} = Manole.build_query(Person, filter)
 {:ok,
  #Ecto.Query<from p0 in Manole.Person,
-  where: p0.name == ^"Alice" and
+  where: p0.name == ^"Alice" or
   (p0.name == ^"Bob" or p0.age > ^"30" or
      (p0.name == ^"Carol" and p0.age < ^"27" and p0.income > ^"100000"))>}
-iex> Repo.all(query) |> Enum.map( &&1.name)
+iex> Repo.all(query) |> Enum.map(& &1.name)
 ["Alice", "Bob"]
 ```
 

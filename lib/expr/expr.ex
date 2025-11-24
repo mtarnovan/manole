@@ -46,12 +46,6 @@ defmodule Manole.Expr do
     end
   end
 
-  defimpl Inspect, for: Rule do
-    def inspect(rule, _opts) do
-      "Rule <#{rule.field}#{rule.operator}#{rule.value}>"
-    end
-  end
-
   defmodule Group do
     @moduledoc false
     @enforce_keys ~w(combinator children)a
@@ -61,11 +55,5 @@ defmodule Manole.Expr do
             combinator: atom(),
             children: [Manole.Expr.Rule.t() | t()]
           }
-  end
-
-  defimpl Inspect, for: Group do
-    def inspect(group, _opts) do
-      "Group <#{group.combinator}, children: #{length(group.children)}>"
-    end
   end
 end

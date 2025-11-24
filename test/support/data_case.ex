@@ -1,10 +1,13 @@
 defmodule Manole.DataCase do
+  @moduledoc false
   use ExUnit.CaseTemplate
+
+  alias Ecto.Adapters.SQL.Sandbox
+  alias Manole.Repo
 
   using do
     quote do
       alias Manole.Repo
-
       import Ecto
       import Ecto.Query
       import Manole.DataCase
@@ -12,10 +15,10 @@ defmodule Manole.DataCase do
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Manole.Repo)
+    :ok = Sandbox.checkout(Repo)
 
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Manole.Repo, {:shared, self()})
+      Sandbox.mode(Repo, {:shared, self()})
     end
 
     :ok

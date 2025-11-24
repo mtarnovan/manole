@@ -191,23 +191,6 @@ defmodule Manole.Builder.Ecto do
         {path_parts, [field]} = Enum.split(parts, length(parts) - 1)
         binding_name = path_to_binding(path_parts)
 
-        # We need the schema for this binding to validate the field
-        # This is tricky. Ecto.Query doesn't easily expose schema of named bindings without digging.
-        # But `field` macro allows generic atom.
-        # For improved validation, we should ideally inspect the joined schema.
-        # But `q` has the structure.
-
-        # Let's trust Ecto's runtime check for the field on the binding?
-        # The user wanted schema reflection.
-        # We can find the schema from the named binding in the query?
-        # `q.aliases` maps alias to index. `q.joins` has the joins.
-        # This is getting complex for reflection.
-
-        # Strategy:
-        # 1. Use `to_existing_atom` for field name (safe-ish if it's a known field).
-        # 2. Or try to resolve schema.
-
-        # Let's resolve schema from query joins if possible.
         schema = get_schema_for_binding(q, binding_name)
         field_atom = validate_field!(schema, field)
 
@@ -234,13 +217,6 @@ defmodule Manole.Builder.Ecto do
   defp get_schema(_), do: nil
 
   defp get_schema_for_binding(query, binding_name) do
-    # Reverse lookup binding -> schema is hard in pure Ecto public API without traversing joins.
-    # However, since we JUST built the query, we know the joins.
-    # But we are inside build_rule_dynamic which takes `q`.
-
-    # Iterating joins to find the one with `as: binding_name`
-    # query.joins is a list of Ecto.Query.JoinExpr
-
     Enum.find_value(query.joins, fn
       %{as: ^binding_name, source: {_table, schema}} -> schema
       _ -> nil

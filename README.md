@@ -70,22 +70,37 @@ queryable is inspected to check if it already has a named binding for that join,
 and if it doesn't, it is added automatically.
 
 ```elixir
-%{
-  combinator: :and,
-  rules: [
-    %{
-      field: "comments.inserted_at",
-      operator: ">",
-      value: "2016-08-18T15:33:17"
-    }
-  ]
+filter = %{
+  rules: [%{value: "one", operator: :contains, field: "dogs.toys.name"}],
+  combinator: :or
 }
+
+alias Manole.{Repo, Person, Factory}
+
+Factory.insert_person_with_dog_and_toy(
+  %{name: "Alice", age: 30},
+  %{name: "Gigi"},
+  %{name: "Bone", color: "blue"}
+)
+Factory.insert_person_with_dog_and_toy(
+  %{name: "Bob", age: 30},
+  %{name: "Jimbo"},
+  %{name: "Trombone", color: "pink"}
+)
+Factory.insert_person_with_dog_and_toy(
+  %{name: "Carol", age: 30},
+  %{name: "Rex"},
+  %{name: "Ball", color: "red"}
+)
+{:ok, query} = Manole.build_query(Person, filter)
 ```
 
 would result in something like this:
 
-```sql
-...inner join comments...where (comments.inserted_at > '2016-08-18T15:33:17')
+```elixir
+Ecto.Query<from p0 in Manole.Person, join: d1 in assoc(p0, :dogs), as: :dogs,
+  join: t2 in assoc(d1, :toys), as: :dogs_toys,
+  where: ilike(as(:dogs_toys).name, ^"%one%")>
 ```
 
 ### Allowlisting (Security)

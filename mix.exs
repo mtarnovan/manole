@@ -10,6 +10,7 @@ defmodule Manole.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
+      dialyzer: [plt_add_apps: [:ex_unit]],
       aliases: aliases()
     ]
   end
@@ -49,7 +50,7 @@ defmodule Manole.MixProject do
   defp aliases do
     [
       lint: [
-        "compile --warnings-as-errors",
+        "compile --force --warnings-as-errors",
         "credo --strict",
         "format --check-formatted",
         "dialyzer"
